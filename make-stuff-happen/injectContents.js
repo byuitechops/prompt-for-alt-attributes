@@ -1,8 +1,8 @@
 //2
-const injectHtml = require('./injectHtml.js'),
-    changeAlts = require('./changeAlts.js');
+const injectHtml = require('../injectHtml.js'),
+    changeAlts = require('./make-stuff-happen/changeAlts.js');
 
-module.exports = function injectContents(err, pages, noAltImgs, imageIDs) {
+module.exports = function (err, pages, noAltImgs, imageIDs) {
     //2. After all images are retrieved, inject each image into the html page.
     noAltImgs.forEach(function (image) {
         var document = window.document;

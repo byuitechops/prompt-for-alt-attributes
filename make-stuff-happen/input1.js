@@ -4,7 +4,7 @@ const cheerio = require('cheerio'),
     fs = require('fs'),
     pathLib = require('path'),
     chalk = require('chalk'),
-    injectContents = require('./injectContents.js');
+    injectContents = require('./make-stuff-happen/injectContents.js');
 
 function getImagesToName() {
     var currentPath = document.getElementById('uploadFile').files[0].path;
