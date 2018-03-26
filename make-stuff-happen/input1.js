@@ -1,19 +1,22 @@
+/*eslint no-unused-vars:1 */
 const cheerio = require('cheerio'),
-    async = require('async'),
     fs = require('fs'),
     pathLib = require('path'),
-    chalk = require('chalk');
+    chalk = require('chalk'),
+    injectContents = require('runMain2.js');
 //could also try .files[0].path (instead of .value)
 var currentPath = document.getElementById('uploadFile').value;
 
-module.exports = (firstCb) => {
+function getImagesToName() {
+    //might have to manipulate currentPath before it's used
+    console.log('return value:', currentPath);
     var imgId = 0;
 
     function iterateId(n) {
         imgId = imgId + n;
     }
     //1A. (on installation/first click) retrieve all the html files from the files
-    function getAllPages(getAllPagesCb) {
+    function getAllPages() {
         var htmlFiles = fs.readdirSync(currentPath)
             .filter(function (file) {
                 return file.includes('.html');
@@ -24,11 +27,15 @@ module.exports = (firstCb) => {
                     contents: fs.readFileSync(file, 'utf8')
                 };
             });
-        getAllPagesCb(null, htmlFiles);
+        pagesToImageObjs(null, htmlFiles);
     }
 
     //1B. (on installation/first click) once all images are retrieved, turn them into objects.
-    function pagesToImageObjs(htmlFiles, pagesToImgObjCb) {
+    function pagesToImageObjs(err, htmlFiles) {
+        if (err) {
+            console.error(err);
+            return;
+        }
         var alts = {
             noAltImgs: [],
             imgIds: []
@@ -48,7 +55,7 @@ module.exports = (firstCb) => {
                     // make a list of the alt attributes
                     var filename = pathLib.basename(src),
                         source = pathLib.resolve(pathLib.dirname(src), filename);
-                    //push each image obj to later match it
+                    //push each image obj to later match it with an imgID
                     iterateId(1);
                     alts.noAltImgs.push({
                         source: source,
@@ -64,10 +71,7 @@ module.exports = (firstCb) => {
             return alts;
         }, alts);
         console.log(chalk.magenta(' # images to name:', alts.noAltImgs.length));
-        pagesToImgObjCb(null, htmlFiles, alts.noAltImgs, alts.imgIds);
+        injectContents(null, htmlFiles, alts.noAltImgs, alts.imgIds);
     }
-    async.waterfall([getAllPages, pagesToImageObjs], function (err, pages) {
-        //not sure how to handle this, noAltImgs needs to be passed to the finalCb
-        firstCb(null, pages);
-    });
-};
+    getAllPages();
+}

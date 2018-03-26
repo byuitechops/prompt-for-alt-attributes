@@ -6,7 +6,11 @@ const pathLib = require('path'),
     currentPath = document.getElementById('uploadFile').value;
 
 //takes the path given by the user, and the final pages.
-module.exports = (pages) => {
+module.exports = (err, pages) => {
+    if (err) {
+        console.error(err);
+        return;
+    }
     var timestamp = Date.now(),
         //instead of  using timestamp, use fs.readlinkSync to name it the same as the course w/the extra word 'new' or something
         newPath = pathLib.resolve(currentPath, 'updatedFiles ' + timestamp);
@@ -18,5 +22,4 @@ module.exports = (pages) => {
         fs.writeFileSync(path, page.html);
     });
     console.log(chalk.cyan('PROCESS COMPLETE! Find the updated files in: ' + newPath));
-
 };

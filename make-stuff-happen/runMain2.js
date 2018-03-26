@@ -1,8 +1,8 @@
-const chalk = require('chalk'),
-    injectHtml = require('./injectHtml.js'),
-    nextFile = require('./addAlt3.js');
+/*eslint no-undef:1 */
+const injectHtml = require('./injectHtml.js'),
+    changeAlts = require('./addAlt3.js');
 
-module.exports = (pages, noAltImgs, imageIDs) => {
+module.exports = (err, pages, noAltImgs, imageIDs) => {
     //2. After all images are retrieved, inject each image into the html page.
     noAltImgs.forEach(function (image) {
         var document = window.document;
@@ -33,6 +33,5 @@ module.exports = (pages, noAltImgs, imageIDs) => {
             image.alt === text;
         });
     }
-    //send changes to callback
-    nextFile(null, pages, noAltImgs);
+    changeAlts(null, pages, noAltImgs);
 };

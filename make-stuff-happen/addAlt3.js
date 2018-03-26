@@ -2,7 +2,11 @@ const pathLib = require('path'),
     chalk = require('chalk'),
     lastFile = require('./output4.js');
 
-module.exports = (pages, newAltImgs) => {
+module.exports = (err, pages, newAltImgs) => {
+    if (err) {
+        console.error(err);
+        return;
+    }
     //3.After button is selected, use this function to change the pages based on the last function
     pages.forEach(function (page) {
         //images from the page object mapped previously
@@ -27,5 +31,5 @@ module.exports = (pages, newAltImgs) => {
     function changeAlt(image, newAlt) {
         image.attr('alt', newAlt);
     }
-    lastFile(pages);
+    lastFile(null, pages);
 };
