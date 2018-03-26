@@ -1,15 +1,16 @@
+//1
 /*eslint no-unused-vars:1 */
 const cheerio = require('cheerio'),
     fs = require('fs'),
     pathLib = require('path'),
     chalk = require('chalk'),
-    injectContents = require('runMain2.js');
-//could also try .files[0].path (instead of .value)
-var currentPath = document.getElementById('uploadFile').value;
+    injectContents = require('./injectContents.js');
 
 function getImagesToName() {
-    //might have to manipulate currentPath before it's used
-    console.log('return value:', currentPath);
+    var currentPath = document.getElementById('uploadFile').files[0].path;
+    if (currentPath !== undefined) {
+        console.log(chalk.green('Valid Path:', currentPath));
+    }
     var imgId = 0;
 
     function iterateId(n) {
@@ -24,7 +25,7 @@ function getImagesToName() {
             .map(function (file) {
                 return {
                     file: file,
-                    contents: fs.readFileSync(file, 'utf8')
+                    contents: fs.readFileSync(pathLib.resolve(currentPath, file), 'utf8')
                 };
             });
         pagesToImageObjs(null, htmlFiles);
