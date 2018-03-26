@@ -1,0 +1,41 @@
+/*Style the main page*/
+
+body {
+    margin: 6%;
+    font-family: Helvetica, Verdana, sans-serif;
+    padding: 8%;
+    border-radius: 12px;
+}
+
+.imageDiv {
+    width: 100%;
+}
+
+/*Style the input box*/
+
+.altInput {
+    border: 1px solid gray;
+    border-radius: 5px;
+    width: 45%;
+    height: 30px;
+}
+
+/*Style the submit button*/
+
+#submitButton {
+    width: 15%px;
+    border-radius: 8px;
+    margin-top: 20px;
+    padding: 1.1%;
+    font-size: 16px;
+    color: white;
+    background-color: #0076C6;
+    border: none;
+    position: absolute;
+    top: 90px;
+    right: 180px;
+}
+
+#submitButton:hover {
+    opacity: 0.8;
+}
