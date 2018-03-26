@@ -2,16 +2,15 @@
   "name": "prompt-for-alts",
   "version": "1.0.0",
   "description": "ashleys learning project",
-  "main": "newAlt.js",
+  "main": "main.js",
   "scripts": {
-    "test": "node --inspect-brk newAlt.js",
     "start": "electron ."
   },
   "author": "Ashley Stewart",
   "license": "MIT",
   "preferGlobal": true,
   "bin": {
-    "prompt-alts": "./newAlt.js"
+    "prompt-alts": "./main.js"
   },
   "dependencies": {
     "chalk": "^2.3.0",
