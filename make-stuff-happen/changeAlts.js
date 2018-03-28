@@ -1,7 +1,7 @@
 //3
 const pathLib = require('path'),
     chalk = require('chalk'),
-    output = require('./make-stuff-happen/output.js');
+    output = require('./output.js');
 
 module.exports = function changeAlts(err, pages, newAltImgs) {
     if (err) {
