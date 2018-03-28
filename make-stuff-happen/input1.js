@@ -1,5 +1,6 @@
 //1
 /*eslint no-unused-vars:1 */
+/*eslint no-redeclare:1 */
 const cheerio = require('cheerio'),
     fs = require('fs'),
     pathLib = require('path'),
@@ -8,8 +9,8 @@ const cheerio = require('cheerio'),
 
 function getImagesToName() {
     var currentPath = document.getElementById('uploadFile').files[0].path;
-    if (currentPath !== undefined) {
-        console.log(chalk.green('Valid Path:', currentPath));
+    if (currentPath == undefined) {
+        console.log('INVALID path chosen by user.');
     }
     var imgId = 0;
 
@@ -23,9 +24,10 @@ function getImagesToName() {
                 return file.includes('.html');
             })
             .map(function (file) {
+                var correctPath = pathLib.resolve(currentPath, file);
                 return {
                     file: file,
-                    contents: fs.readFileSync(pathLib.resolve(currentPath, file), 'utf8')
+                    contents: fs.readFileSync(correctPath, 'utf8')
                 };
             });
         pagesToImageObjs(null, htmlFiles);
@@ -51,11 +53,23 @@ function getImagesToName() {
             images.each(function (i, image) {
                 image = file.dom(image);
                 var alt = image.attr('alt'),
-                    src = image.attr('src');
+                    //take out the session val added by electron
+                    src = image.attr('src').split('?')[0];
+                if (src.includes('Course%20Files')) {
+                    var imageName = pathLib.parse(src).name,
+                        ext = pathLib.parse(src).ext,
+                        newSrc = `Course%20Files/${imageName + ext}`;
+                    file.images.push(image);
+                } else if (src.includes('Web%20Files')) {
+                    var imageName = pathLib.parse(src).name,
+                        ext = pathLib.parse(src).ext,
+                        newSrc = `Web%20Files/${imageName + ext}`;
+                } else {
+                    var imageName = pathLib.parse(src).name,
+                        ext = pathLib.parse(src).ext;
+                }
                 if (!alt || alt === '') {
-                    // make a list of the alt attributes
-                    var filename = pathLib.basename(src),
-                        source = pathLib.resolve(pathLib.dirname(src), filename);
+                    var source = pathLib.resolve(currentPath, newSrc);
                     //push each image obj to later match it with an imgID
                     iterateId(1);
                     alts.noAltImgs.push({
@@ -65,14 +79,12 @@ function getImagesToName() {
                     });
                     alts.imgIds.push(imgId);
                     file.images.push(image);
-                } else if (src.includes('Course%20Files')) {
-                    file.images.push(image);
                 }
             });
             return alts;
         }, alts);
         console.log(chalk.magenta(' # images to name:', alts.noAltImgs.length));
-        injectContents(null, htmlFiles, alts.noAltImgs, alts.imgIds);
+        injectContents(null, currentPath, htmlFiles, alts.noAltImgs, alts.imgIds);
     }
     getAllPages();
 }
