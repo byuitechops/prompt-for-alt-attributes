@@ -8,7 +8,11 @@
 </head>
 
 <body>
-    <!-- <input type='button' id='submitButton' value='Submit All' /> -->
+    <input type='button' id='submitButton' value='Submit All' />
+    <script src="./makeHtmlChanges.js"></script>
+    <script>
+        document.getElementById('submitButton').addEventListener('click', makeHtmlChanges)
+    </script>
     <input type="file" id="uploadFile" webkitdirectory />
     <script src="./make-stuff-happen/input1.js"></script>
     <script>
