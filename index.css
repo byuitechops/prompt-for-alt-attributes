@@ -1,8 +1,9 @@
 /*Style the main page*/
 
+@import url('https://fonts.googleapis.com/css?family=Quicksand');
 body {
     margin: 6%;
-    font-family: Helvetica, Verdana, sans-serif;
+    font-family: 'Quicksand', Verdana, sans-serif;
     padding: 8%;
     border-radius: 12px;
 }
@@ -16,7 +17,7 @@ body {
 .altInput {
     border: 1px solid gray;
     border-radius: 5px;
-    width: 45%;
+    width: 60%;
     height: 30px;
 }
 
@@ -38,4 +39,21 @@ body {
 
 #submitButton:hover {
     opacity: 0.8;
+}
+
+h2 {
+    color: #313740;
+}
+
+.brokenImage {
+    color: #D48581;
+    font-style: bold;
+}
+
+h3 {
+    color: #577F6F;
+}
+
+img {
+    width: 45%;
 }
