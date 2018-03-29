@@ -7,16 +7,26 @@ const cheerio = require('cheerio'),
     chalk = require('chalk'),
     injectContents = require('./make-stuff-happen/injectContents.js');
 
+function isUrl(urlString) {
+    return urlString.includes('http');
+}
+
+function isValidPath(imgPath) {
+    fs.access(imgPath, (err) => {
+        if (err) {
+            return false;
+        } else {
+            return true;
+        }
+    });
+}
+
 function getImagesToName() {
     var currentPath = document.getElementById('uploadFile').files[0].path;
     if (currentPath == undefined) {
         console.log('INVALID path chosen by user.');
     }
-    var imgId = 0;
 
-    function iterateId(n) {
-        imgId = imgId + n;
-    }
     //1A. (on installation/first click) retrieve all the html files from the files
     function getAllPages() {
         var htmlFiles = fs.readdirSync(currentPath)
@@ -41,7 +51,7 @@ function getImagesToName() {
         }
         var alts = {
             noAltImgs: [],
-            imgIds: []
+            brokenImgs: []
         };
 
         //don't need to catch the reduce contents because you're editing the obj thats being passed
@@ -49,42 +59,57 @@ function getImagesToName() {
             //parse the html with cheerio
             file.dom = cheerio.load(file.contents);
             var images = file.dom('img');
-            file.images = [];
+            file.images = [],
+                file.brokenImgs = [];
             images.each(function (i, image) {
                 image = file.dom(image);
                 var alt = image.attr('alt'),
                     //take out the session val added by electron
-                    src = image.attr('src').split('?')[0];
+                    src = image.attr('src').split('?')[0],
+                    imageName = pathLib.parse(src).name,
+                    ext = pathLib.parse(src).ext,
+                    newSrc;
+                //if it's not a valid path, then identify it as a broken image.
+                //FIND OUT WHY IT'S ALWAYS EVALUATING AS TRUE IN THE ELECTRON CONSOLE
+                if (!isValidPath(src)) {
+                    var item = {
+                        imageFile: file.file,
+                        source: src
+                    };
+                    file.brokenImgs.push(item);
+                    alts.brokenImgs.push(item);
+                }
                 if (src.includes('Course%20Files')) {
-                    var imageName = pathLib.parse(src).name,
-                        ext = pathLib.parse(src).ext,
-                        newSrc = `Course%20Files/${imageName + ext}`;
+                    newSrc = `Course%20Files/${imageName + ext}`;
                     file.images.push(image);
                 } else if (src.includes('Web%20Files')) {
-                    var imageName = pathLib.parse(src).name,
-                        ext = pathLib.parse(src).ext,
-                        newSrc = `Web%20Files/${imageName + ext}`;
+                    newSrc = `Web%20Files/${imageName + ext}`;
                 } else {
-                    var imageName = pathLib.parse(src).name,
-                        ext = pathLib.parse(src).ext;
+                    //leave this here to handle equella links
+                    newSrc = src;
                 }
                 if (!alt || alt === '') {
-                    var source = pathLib.resolve(currentPath, newSrc);
+                    if (!src) {
+                        console.log('image does not exist');
+                        return;
+                    } else if (!isUrl(src)) {
+                        var source = pathLib.resolve(currentPath, newSrc);
+                    } else {
+                        source = src;
+                    }
                     //push each image obj to later match it with an imgID
-                    iterateId(1);
                     alts.noAltImgs.push({
                         source: source,
                         imageFile: file.file,
-                        imgId: imgId
                     });
-                    alts.imgIds.push(imgId);
                     file.images.push(image);
                 }
             });
             return alts;
         }, alts);
         console.log(chalk.magenta(' # images to name:', alts.noAltImgs.length));
-        injectContents(null, currentPath, htmlFiles, alts.noAltImgs, alts.imgIds);
+        //only gets passed once...
+        injectContents(null, currentPath, htmlFiles, alts.noAltImgs, alts.brokenImgs);
     }
     getAllPages();
 }
