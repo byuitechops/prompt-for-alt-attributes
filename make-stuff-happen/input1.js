@@ -12,12 +12,15 @@ function isUrl(urlString) {
 }
 
 function isValidPath(imgPath) {
-    fs.access(imgPath, (err) => {
+    var isValid;
+    // imgPath = imgPath.replace(/%20/g, ' '); //regex /g thing.
+    fs.access(imgPath, (err, isValid) => {
         if (err) {
-            return false;
+            isValid = false;
         } else {
-            return true;
+            isValid = true;
         }
+        return isValid;
     });
 }
 
@@ -65,13 +68,14 @@ function getImagesToName() {
                 image = file.dom(image);
                 var alt = image.attr('alt'),
                     //take out the session val added by electron
-                    src = image.attr('src').split('?')[0],
+                    src = pathLib.resolve(currentPath, image.attr('src').split('?')[0]),
                     imageName = pathLib.parse(src).name,
                     ext = pathLib.parse(src).ext,
                     newSrc;
                 //if it's not a valid path, then identify it as a broken image.
                 //FIND OUT WHY IT'S ALWAYS EVALUATING AS TRUE IN THE ELECTRON CONSOLE
-                if (!isValidPath(src)) {
+                console.log('src: ', src);
+                if (isValidPath(src) == false) {
                     var item = {
                         imageFile: file.file,
                         source: src
