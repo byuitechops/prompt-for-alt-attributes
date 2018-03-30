@@ -1,3 +1,4 @@
+//2.5
 const pathLib = require('path');
 module.exports = (filename, image, inputId) => {
     return `<h2>File: ${filename}</h2>

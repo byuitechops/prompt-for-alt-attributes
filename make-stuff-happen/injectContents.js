@@ -1,8 +1,5 @@
 //2
-/*eslint no-unused-vars:1 */
-/*eslint no-debugger:1 */
 const injectHtml = require('../injectHtml.js'),
-    changeAlts = require('./changeAlts.js'),
     injectBrokenImgHtml = require('./injectBrokenImgHtml.js');
 
 module.exports = function (err, path, pages, noAltImgs, brokenImages) {
@@ -21,11 +18,10 @@ module.exports = function (err, path, pages, noAltImgs, brokenImages) {
     });
     //broken images is weird now. Non broken are showing up.
     brokenImages.forEach(function (brokenImg) {
-        console.log('BROKEN IMAGE -', brokenImg);
+        console.log('BROKEN IMAGE -', brokenImg.source);
         var document = window.document;
         var div = document.createElement('div');
         div.innerHTML = injectBrokenImgHtml(brokenImg.imageFile, brokenImg.source);
         document.body.appendChild(div);
     });
-
 };
