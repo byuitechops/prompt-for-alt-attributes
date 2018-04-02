@@ -5,7 +5,7 @@ var changeAlts = require('./make-stuff-happen/changeAlts.js');
 NEXT PART HAPPENS AFTER USER SUBMITS
 --------------------------------------*/
 //how is noAltImgs gonna be defined if this happens after a click event?
-function makeHtmlChanges(err, pages, noAltsImgs) {
+function makeHtmlChanges(err, pages /* , noAltImgs */ ) {
     var inputs = document.querySelectorAll('input'),
         textList = [];
     inputs.forEach(function (text) {
@@ -26,6 +26,7 @@ function makeHtmlChanges(err, pages, noAltsImgs) {
 
     function makeChanges(image, text) {
         //add text as the new alt property
+        //noAltImgs.forEach((altImg)=>{});
         image.alt === text;
     }
     changeAlts(null, pages);
