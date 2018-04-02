@@ -1,5 +1,5 @@
 //2
-const injectHtml = require('../injectHtml.js'),
+const injectHtml = require('./injectHtml.js'),
     injectBrokenImgHtml = require('./injectBrokenImgHtml.js');
 
 module.exports = function (err, path, pages, noAltImgs, brokenImages) {
