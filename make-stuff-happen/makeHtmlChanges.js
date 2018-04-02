@@ -1,11 +1,12 @@
+//3
 /*eslint no-unused-vars:1 */
 var changeAlts = require('./make-stuff-happen/changeAlts.js');
 
-/*--------------------------------------
-NEXT PART HAPPENS AFTER USER SUBMITS
---------------------------------------*/
-//how is noAltImgs gonna be defined if this happens after a click event?
-function makeHtmlChanges(err, pages /* , noAltImgs */ ) {
+/*--------------------------
+HAPPENS AFTER USER SUBMITS
+--------------------------*/
+function makeHtmlChanges(err, pages) {
+    var images = document.querySelectorAll('img');
     var inputs = document.querySelectorAll('input'),
         textList = [];
     inputs.forEach(function (text) {
@@ -16,17 +17,16 @@ function makeHtmlChanges(err, pages /* , noAltImgs */ ) {
             });
         }
     });
-    //this function needs to be wrapped in a noAltImgs.forEach.
-    textList.forEach(function (text) {
-        //if text id = image id, then call makeChanges(image, text.text)
-        if (text.id) {
-            makeChanges( /*,*/ text.text);
-        }
+    images.forEach(function (image) {
+        textList.forEach(function (text) {
+            if (text.id === image.id) {
+                makeChanges(image, text.text);
+            }
+        });
     });
 
     function makeChanges(image, text) {
         //add text as the new alt property
-        //noAltImgs.forEach((altImg)=>{});
         image.alt === text;
     }
     changeAlts(null, pages);
