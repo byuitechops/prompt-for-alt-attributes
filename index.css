@@ -45,6 +45,11 @@ h2 {
     color: #313740;
 }
 
+.broken {
+    border: 5px solid red;
+    font-size: 20px;
+}
+
 .brokenImage {
     color: #D48581;
     font-style: bold;
