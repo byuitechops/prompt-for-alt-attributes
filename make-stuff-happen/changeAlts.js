@@ -1,4 +1,4 @@
-//3
+//4
 const pathLib = require('path'),
     chalk = require('chalk'),
     output = require('./output.js');
