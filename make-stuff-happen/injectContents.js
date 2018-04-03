@@ -7,7 +7,7 @@ module.exports = function (err, noAltImgs, brokenImages) {
     var document = window.document;
     noAltImgs.forEach(function (image) {
         //create a new div each time, and not in the same div
-        var div = document.createElement('div', 'class="broken"');
+        var div = document.createElement('div');
         div.innerHTML = injectHtml(image.imageFile, image.source, image.id);
         document.body.appendChild(div);
     });
@@ -15,7 +15,7 @@ module.exports = function (err, noAltImgs, brokenImages) {
     // console.log('# broken Images', brokenImages.length);
     brokenImages.forEach(function (brokenImg) {
         console.log('BROKEN IMAGE -', brokenImg.source);
-        var div = document.createElement('div');
+        var div = document.createElement('div', 'class="broken"');
         div.innerHTML = injectBrokenImgHtml(brokenImg.imageFile, brokenImg.source);
         document.body.appendChild(div);
     });

@@ -1,8 +1,9 @@
 //2.5
-const pathLib = require('path');
+// const pathLib = require('path');
+// ${pathLib.parse(image).base}
 module.exports = (filename, image, id) => {
     return `<h2>File: ${filename}</h2>
-    <h3>Image: ${pathLib.parse(image).base}</h3>
+    <h3>Image: </h3>
     <div class="imageDiv brokenImage">
     <img src="${image}" id ='${id}'>
     </div>
