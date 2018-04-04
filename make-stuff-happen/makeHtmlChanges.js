@@ -1,14 +1,16 @@
 //3
 /*eslint no-unused-vars:1 */
+const pathLib = require('path');
 var changeAlts = require('./make-stuff-happen/changeAlts.js');
 
 /*--------------------------
 HAPPENS AFTER USER SUBMITS
 --------------------------*/
-function makeHtmlChanges(err, pages) {
+function makeHtmlChanges() {
     var images = document.querySelectorAll('img');
     var inputs = document.querySelectorAll('input'),
-        textList = [];
+        textList = [],
+        updatedImages = [];
     inputs.forEach(function (text) {
         if (text.value !== '') {
             textList.push({
@@ -18,16 +20,17 @@ function makeHtmlChanges(err, pages) {
         }
     });
     images.forEach(function (image) {
+        var imageName = pathLib.basename(image);
         textList.forEach(function (text) {
             if (text.id === image.id) {
-                makeChanges(image, text.text);
+                updatedImages.push({
+                    name: imageName,
+                    id: image.id,
+                    source: image.source,
+                    alt: text.text
+                });
             }
         });
     });
-
-    function makeChanges(image, text) {
-        //add text as the new alt property
-        image.alt === text;
-    }
-    changeAlts(null, pages);
+    changeAlts(null, updatedImages);
 }
