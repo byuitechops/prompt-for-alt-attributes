@@ -1,6 +1,5 @@
 //1
 /*eslint no-unused-vars:1 */
-/*eslint no-redeclare:1 */
 const cheerio = require('cheerio'),
     fs = require('fs'),
     pathLib = require('path'),
@@ -9,19 +8,25 @@ const cheerio = require('cheerio'),
 var htmlFiles;
 
 function isUrl(urlString) {
-    return urlString.includes('http');
+    return urlString.includes('http://');
 }
 
-function isValidPath(imgPath) {
+function isValidPath(imgPath, callback) {
     var isValid;
     fs.access(imgPath, (err, isValid) => {
         if (err) {
             isValid = false;
+            callback(err);
         } else {
             isValid = true;
         }
-        return isValid;
+        callback(null, isValid);
+        // return isValid;
     });
+}
+
+function decodeMe(imgPath) {
+    return decodeURI(imgPath);
 }
 var imgId = 0;
 
@@ -31,31 +36,27 @@ function iterateId(n) {
 }
 
 function getImagesToName() {
-    //cannot read path property of this?
     var currentPath = document.getElementById('uploadFile').files[0].path;
-    console.log('chosen path: ', currentPath);
-    if (currentPath == undefined) {
+    if (currentPath === undefined) {
+        console.log('UNDEFINED path. Please try again.');
+        return;
+    } else if (isValidPath(currentPath) === false) {
         console.log('INVALID path chosen by user. Please try again.');
-    } else if (isValidPath(currentPath) !== true) {
-        console.log('INVALID path chosen by user. Please try again.');
+        return;
     }
 
     //1A. (on installation/first click) retrieve all the html files from the files
     function getAllPages() {
-        htmlFiles = fs.readdir(currentPath, function (err, files) {
-            if (err) {
-                console.log(err);
-            }
-            return files;
-        }).filter((file) => {
-            return file.includes('.html');
-        }).map((file) => {
-            var correctPath = pathLib.resolve(currentPath, file);
-            return {
-                file: file,
-                contents: fs.readFileSync(correctPath, 'utf8')
-            };
-        });
+        htmlFiles = fs.readdirSync(currentPath)
+            .filter(function (file) {
+                return file.includes('.html');
+            }).map(function (file) {
+                var correctPath = pathLib.resolve(currentPath, file);
+                return {
+                    file: file,
+                    contents: fs.readFileSync(correctPath, 'utf8')
+                };
+            });
         pagesToImageObjs(null, htmlFiles);
     }
 
@@ -75,58 +76,50 @@ function getImagesToName() {
             //parse the html with cheerio
             file.dom = cheerio.load(file.contents);
             var images = file.dom('img');
-            file.images = [],
-                file.brokenImgs = [];
+            file.images = [];
             images.each(function (i, image) {
                 image = file.dom(image);
                 var alt = image.attr('alt'),
                     //take out the session val added by electron
                     src = pathLib.resolve(currentPath, image.attr('src').split('?')[0]),
-                    imageName = pathLib.parse(src).name,
-                    ext = pathLib.parse(src).ext,
-                    newSrc;
+                    newSrc = decodeMe(src);
+
                 //if it's not a valid path, then identify it as a broken image.
-                if (isValidPath(src) == false) {
-                    var item = {
-                        imageFile: file.file,
-                        source: src
-                    };
-                    file.brokenImgs.push(item);
-                    alts.brokenImgs.push(item);
-                }
-                if (src.includes('Course%20Files')) {
-                    newSrc = `Course%20Files/${imageName + ext}`;
-                    file.images.push(image);
-                } else if (src.includes('Web%20Files')) {
-                    newSrc = `Web%20Files/${imageName + ext}`;
-                } else {
+                if (isValidPath(newSrc) == false || !isUrl(newSrc)) {
                     //leave this here to handle equella links
                     newSrc = src;
+                    alts.brokenImgs.push({
+                        imageFile: file.file,
+                        source: newSrc
+                    });
+                } else if (newSrc.includes('Course Files')) {
+                    file.images.push(image);
                 }
                 if (!alt || alt === '') {
-                    if (!src) {
+                    //if the src attribute doesnt exist
+                    if (!src || src === '') {
                         console.log('image does not exist');
-                        return;
-                    } else if (!isUrl(src)) {
+                    } //else if its still not a valid path, 
+                    else if (!isUrl(newSrc)) {
                         var source = pathLib.resolve(currentPath, newSrc);
-                    } else {
-                        source = src;
+                    } //else, its a valid path, so make the source the decoded newSrc 
+                    else {
+                        source = newSrc;
                     }
                     //push each image obj to later match it with an imgID
-                    //no id...?
                     alts.noAltImgs.push({
                         source: source,
                         imageFile: file.file,
                         id: iterateId(1)
                     });
-                    file.images.push(image);
                 }
             });
             return alts;
         }, alts);
+        console.log('# broken images: ', alts.brokenImgs.length);
         console.log(chalk.magenta(' # images to name:', alts.noAltImgs.length));
         //only gets passed once...
-        injectContents(null, htmlFiles, alts.noAltImgs, alts.brokenImgs);
+        injectContents(null, alts.noAltImgs, alts.brokenImgs);
     }
     getAllPages();
 }
