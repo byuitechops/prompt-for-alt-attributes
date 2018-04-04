@@ -12,9 +12,8 @@ module.exports = function (err, noAltImgs, brokenImages) {
         document.body.appendChild(div);
     });
     //I don't know how to catch this from the browser
-    // console.log('# broken Images', brokenImages.length);
     brokenImages.forEach(function (brokenImg) {
-        console.log('BROKEN IMAGE -', brokenImg.source);
+        //console.log('BROKEN IMAGE -', brokenImg.source);
         var div = document.createElement('div', 'class="broken"');
         div.innerHTML = injectBrokenImgHtml(brokenImg.imageFile, brokenImg.source);
         document.body.appendChild(div);
