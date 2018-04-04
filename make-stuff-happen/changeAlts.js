@@ -1,9 +1,10 @@
 //4
 const pathLib = require('path'),
     chalk = require('chalk'),
-    output = require('./output.js');
-
-module.exports = function changeAlts(err, pages, newAltImgs) {
+    output = require('./output.js'),
+    pages = [];
+//might have to redefine pages and reread the dir
+module.exports = function changeAlts(err, newAltImgs) {
     if (err) {
         console.error(err);
         return;
