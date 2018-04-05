@@ -2,16 +2,15 @@
 const pathLib = require('path'),
     chalk = require('chalk'),
     output = require('./output.js'),
-    pages = [];
-//might have to redefine pages and reread the dir
+    pages = require('./pages.js');
+
 module.exports = function changeAlts(err, newAltImgs) {
     if (err) {
         console.error(err);
         return;
     }
-    //3.After button is selected, use this function to change the pages based on the last function
-    pages.forEach(function (page) {
-        //images from the page object mapped previously
+    var allPages = pages.getPages();
+    allPages.forEach(function (page) {
         page.images.forEach(function (image) {
             image = page.dom(image);
             var src = image.attr('src');
@@ -26,12 +25,10 @@ module.exports = function changeAlts(err, newAltImgs) {
                 }
             });
         });
-        page.html = page.dom.html();
-        //could take the dom out since you're already saving it 
     });
     //helper function to change the alt text on the actual page, not just on the object
     function changeAlt(image, newAlt) {
         image.attr('alt', newAlt);
     }
-    output(null, pages);
+    output(null, allPages);
 };
