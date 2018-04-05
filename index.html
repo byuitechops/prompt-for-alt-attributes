@@ -10,15 +10,15 @@
 <body>
     <input type='button' id='submitButton' value='Submit All' />
     <script src="./make-stuff-happen/makeHtmlChanges.js"></script>
-    <script>
-        document.getElementById('submitButton').addEventListener('click', makeHtmlChanges)
-    </script>
     <input type="file" id="uploadFile" webkitdirectory />
     <script src="./make-stuff-happen/input1.js"></script>
     <script>
         document.getElementById('uploadFile').addEventListener('change', getImagesToName)
     </script>
     <div id='bodyDiv'></div>
+    <script>
+        document.getElementById('submitButton').addEventListener('click', makeHtmlChanges)
+    </script>
 </body>
 
 </html>
