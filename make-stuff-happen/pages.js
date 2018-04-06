@@ -1,5 +1,6 @@
 /*eslint no-unused-vars:1 */
 /*eslint no-undef:1 */
+/*eslint no-debugger:1 */
 const cheerio = require('cheerio'),
     pathLib = require('path'),
     fs = require('fs'),
@@ -74,7 +75,7 @@ function pagesToImageObjs(err, htmlFiles) {
     };
 
     //don't need to catch the reduce contents because you're editing the obj thats being passed
-    newFiles = htmlFiles.reduce(function (alts, file) {
+    var newFiles = htmlFiles.reduce(function (alts, file) {
         //parse the html with cheerio
         file.dom = cheerio.load(file.contents);
         var images = file.dom('img');
@@ -123,24 +124,23 @@ function pagesToImageObjs(err, htmlFiles) {
 }
 //you'll have to match up the images you receive with the images on page.images
 function matchStuff(newImgs) {
-    //define pages with functions already on the page.
+    console.log(newImgs);
     var pages = getAllPages();
-    //define old images with functions already on the page.
     var oldImgs = pagesToImageObjs(null, pages).noAltImgs;
-    console.log('The images I want are: ', oldImgs);
-    pages.forEach(function (page) {
-        oldImgs.forEach(function (image) {
-            var imageName = pathLib.basename(image.source);
-            console.log('image name :: ', image);
-            newImgs.forEach(function (newImg) {
-                console.log('old image', imageName);
-                console.log('new image: ', image.name);
-                if (newImg.name === imageName) {
-                    page.images.push(newImg);
+    pages.map(function (page) {
+        page.images = oldImgs;
+        page.newImages = [];
+        newImgs.forEach(function (newImg) {
+            oldImgs.forEach(function (image) {
+                var imageName = pathLib.basename(image.source);
+                if (imageName === newImg.name) {
+                    page.newImages.push(newImg);
                 }
             });
         });
+        return pages;
     });
+    return pages;
 }
 module.exports = {
     getPath: getCurrentPath,
