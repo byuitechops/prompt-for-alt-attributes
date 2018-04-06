@@ -38,9 +38,9 @@ function makeHtmlChanges() {
     if (textList.length === 0) {
         changeAlts('You must enter text to submit. ', null);
     }
-    // if (pages.matchStuff == undefined) {
-    //     console.log('This function name doesn\'t exist', pages);
-    // }
-    var matchedImages = pages.match(updatedImages);
-    changeAlts(null, matchedImages);
+    if (pages.match == undefined) {
+        console.log('This function name doesn\'t exist', pages);
+    }
+    var updatedPages = pages.match(updatedImages);
+    changeAlts(null, updatedPages);
 }
