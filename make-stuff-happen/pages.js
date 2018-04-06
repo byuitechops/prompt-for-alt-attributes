@@ -1,6 +1,4 @@
 /*eslint no-unused-vars:1 */
-/*eslint no-undef:1 */
-/*eslint no-debugger:1 */
 const cheerio = require('cheerio'),
     pathLib = require('path'),
     fs = require('fs'),
@@ -124,12 +122,11 @@ function pagesToImageObjs(err, htmlFiles) {
 }
 //you'll have to match up the images you receive with the images on page.images
 function matchStuff(newImgs) {
-    console.log(newImgs);
     var pages = getAllPages();
     var oldImgs = pagesToImageObjs(null, pages).noAltImgs;
     pages.map(function (page) {
-        page.images = oldImgs;
         page.newImages = [];
+        page.images = oldImgs;
         newImgs.forEach(function (newImg) {
             oldImgs.forEach(function (image) {
                 var imageName = pathLib.basename(image.source);
