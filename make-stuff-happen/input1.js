@@ -10,7 +10,7 @@ function getImagesToName() {
     } else if (myPages.length === 0) {
         injectContents('There are no pages.', null, null);
     }
-    var imagesToInject = pages.getImages(null, myPages);
+    var imagesToInject = pages.convertPages(null, myPages);
     if (imagesToInject == undefined) {
         injectContents('Images to Inject is undefined', null, null);
     } else if (imagesToInject.noAltImgs.length === 0) {
