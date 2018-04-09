@@ -1,4 +1,5 @@
 /*eslint no-unused-vars:1 */
+/*eslint no-debugger:1 */
 const cheerio = require('cheerio'),
     pathLib = require('path'),
     fs = require('fs'),
@@ -69,7 +70,8 @@ function pagesToImageObjs(err, htmlFiles) {
     }
     var alts = {
         noAltImgs: [],
-        brokenImgs: []
+        brokenImgs: [],
+        fileImgs: []
     };
 
     //don't need to catch the reduce contents because you're editing the obj thats being passed
@@ -79,6 +81,7 @@ function pagesToImageObjs(err, htmlFiles) {
         var images = file.dom('img');
         file.images = [];
         images.each(function (i, image) {
+            alts.fileImgs.push(image);
             image = file.dom(image);
             var alt = image.attr('alt'),
                 //take out the session val added by electron
@@ -115,6 +118,7 @@ function pagesToImageObjs(err, htmlFiles) {
                 });
             }
         });
+        file.cheerioImgs = alts.fileImgs;
         return alts;
     }, alts);
     console.log(chalk.magenta(' # images to name:', alts.noAltImgs.length));
@@ -127,6 +131,7 @@ function matchStuff(newImgs) {
     pages.map(function (page) {
         page.newImages = [];
         page.images = oldImgs;
+        //map the oldImages to the new ones that have the same name, 
         newImgs.forEach(function (newImg) {
             oldImgs.forEach(function (image) {
                 var imageName = pathLib.basename(image.source);
@@ -142,6 +147,6 @@ function matchStuff(newImgs) {
 module.exports = {
     getPath: getCurrentPath,
     getPages: getAllPages,
-    getImages: pagesToImageObjs,
+    convertPages: pagesToImageObjs,
     match: matchStuff
 };
