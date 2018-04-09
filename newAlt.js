@@ -1,28 +1,26 @@
 #!/usr/bin / env node
 
 /*eslint-env node, es6*/
+/*eslint no-console:0*/
+/*eslint no-undef:1 */
+/*eslint no-unused-vars:1*/
+//get a list of images missing alt text, then for each missing alt text, insert a new alt text to the html file
 var cheerio = require('cheerio'),
     asyncLib = require('async'),
     fs = require('fs'),
+    prompt = require('prompt'),
     pathLib = require('path'),
     currentPath = pathLib.resolve('.'),
-    chalk = require('chalk'),
-    injectHtml = require('./injectHtml.js');
+    chalk = require('chalk');
 
-var imgId = 0;
-
-function iterateId(n) {
-    imgId = imgId + n;
-}
-//1A. (on installation/first click) retrieve all the html files from the files
 function getAllPages(getAllPagesCb) {
+    //retrieve all the html files from the files
     var htmlFiles = fs.readdirSync(currentPath)
         .filter(function (file) {
             return file.includes('.html');
         })
         .map(function (file) {
             return {
-                //somehow the contents are getting printed??
                 file: file,
                 contents: fs.readFileSync(file, 'utf8')
             };
@@ -30,11 +28,10 @@ function getAllPages(getAllPagesCb) {
     getAllPagesCb(null, htmlFiles);
 }
 
-//1B. (on installation/first click) once all images are retrieved, turn them into objects.
 function pagesToImageObjs(htmlFiles, pagesToImgObjCb) {
     var alts = {
         noAltImgs: [],
-        imgIds: []
+        questions: []
     };
 
     //don't need to catch the reduce contents because you're editing the obj thats being passed
@@ -51,14 +48,20 @@ function pagesToImageObjs(htmlFiles, pagesToImgObjCb) {
                 // make a list of the alt attributes
                 var filename = pathLib.basename(src),
                     source = pathLib.resolve(pathLib.dirname(src), filename);
+                //push each individual image question
+                alts.questions.push({
+                    //need the alt obj because results returns an obj
+                    name: 'alt' + alts.questions.length,
+                    description: chalk.green('Please enter alt text for the image ' + filename + '(' + file.file + ')'),
+                    type: 'string',
+                    required: true,
+                    message: chalk.red('Alt text must be a string.')
+                });
                 //push each image obj to later match it
-                iterateId(1);
                 alts.noAltImgs.push({
                     source: source,
-                    imageFile: file.file,
-                    imgId: imgId
+                    imageFile: file.file
                 });
-                alts.imgIds.push(imgId);
                 file.images.push(image);
             } else if (src.includes('Course%20Files')) {
                 file.images.push(image);
@@ -67,47 +70,31 @@ function pagesToImageObjs(htmlFiles, pagesToImgObjCb) {
         return alts;
     }, alts);
     console.log(chalk.magenta(' # images to name:', alts.noAltImgs.length));
-    pagesToImgObjCb(null, htmlFiles, alts.noAltImgs, alts.imgIds);
+    pagesToImgObjCb(null, htmlFiles, alts.noAltImgs, alts.questions);
 }
 
-
-//2. After all images are retrieved, inject each image into the html page.
-function injectImages(pages, noAltImgs, imageIDs, injectCB) {
-    //inject image 
-    noAltImgs.forEach(function (image) {
-        document.innerHTML = injectHtml(image.imageFile, image.source, image.imgId);
-        //this returns the index # 
-        var equalIds = imageIDs.find((i) => {
-            return image.imgId === i;
-        });
-        if (equalIds) {
-            getChanges(image);
+function runPrompt(pages, noAltImgs, questions, promptCb) {
+    prompt.get(questions, function (err, results) {
+        if (err) {
+            promptCb(err);
+            return;
         }
-    });
-
-    function getChanges(image) {
-        //var inputBox = ('input') << cheerio?
-        //grab the text from the input box
-        //stuff that was in the last function...not sure if this is helpful for the new thing
-        /* noAltImgs.forEach(function (image, i) {
+        //move the user data to our image array objs
+        noAltImgs.forEach(function (image, i) {
             image.alt = results['alt' + i];
-        }); */
-        image.alt === '';
-    }
-
-    injectCB(null, pages, noAltImgs);
+        });
+        promptCb(null, pages, noAltImgs);
+    });
+    prompt.start();
 }
 
-
-
-
-//3.After button is selected, use this function to change the pages based on the last function
 //make the changes to the html from alt on noAltImgs[i]
 function changeAltsHtml(pages, newAltImgs, changeAltsHtmlCb) {
     pages.forEach(function (page) {
         //images from the page object mapped previously
         page.images.forEach(function (image) {
             image = page.dom(image);
+            console.log('my image:', image);
             var src = image.attr('src');
             image.source = pathLib.basename(src);
             var oldSrc = image.source;
@@ -115,7 +102,7 @@ function changeAltsHtml(pages, newAltImgs, changeAltsHtmlCb) {
             newAltImgs.forEach(function (newAltImage) {
                 var newSrc = pathLib.basename(newAltImage.source);
                 if (newSrc === oldSrc) {
-                    //console.log(chalk.bgGreen('MATCH ' + newAltImage.imageFile));
+                    console.log(chalk.green('MATCH ' + newAltImage.imageFile));
                     changeAlt(image, newAltImage.alt);
                 }
             });
@@ -127,19 +114,16 @@ function changeAltsHtml(pages, newAltImgs, changeAltsHtmlCb) {
     function changeAlt(image, newAlt) {
         image.attr('alt', newAlt);
     }
-
     changeAltsHtmlCb(null, pages);
 }
-
-var functions = [getAllPages, pagesToImageObjs, injectImages, changeAltsHtml];
+var functions = [getAllPages, pagesToImageObjs, runPrompt, changeAltsHtml];
 
 asyncLib.waterfall(functions, function (err, pages) {
     if (err) {
-        //console.log(err);
+        console.log(err);
         return;
     }
     var timestamp = Date.now(),
-        //instead of  using timestamp, use fs.readlinkSync to name it the same as the course w/the extra word 'new' or something
         newPath = pathLib.resolve(currentPath, 'updatedFiles ' + timestamp);
     fs.mkdirSync(newPath);
     pages.forEach(function (page) {
@@ -148,21 +132,5 @@ asyncLib.waterfall(functions, function (err, pages) {
             path = pathLib.join(newPath, fileName);
         fs.writeFileSync(path, page.html);
     });
-    console.log(chalk.cyan('PROCESS COMPLETE! Find the updated files in: ' + newPath));
+    console.log(chalk.cyan('PROCESS COMPLETE!'));
 });
-/* var userPath = document.getElementById('uploadFile').files[0].path
-        console.log('user path: ' + userPath);
-
-        // Is this where I 'm supposed to run my files?
-        var myFiles = [
-            require('./make-stuff-happen/input1.js'),
-            require('./make-stuff-happen/runMain2.js'),
-            require('./make-stuff-happen/addAlt3.js'),
-            require('./make-stuff-happen/output4.js')
-        ];
-        async.waterfall(myFiles, function (err, pages) {
-            if (err) {
-                console.log(err);
-                return;
-            }
-        }); */
