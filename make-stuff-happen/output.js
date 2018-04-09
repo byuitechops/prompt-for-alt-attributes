@@ -19,7 +19,7 @@ module.exports = function output(err, pages) {
         var parsedPath = pathLib.parse(page.file),
             fileName = parsedPath.name + parsedPath.ext,
             path = pathLib.join(newPath, fileName);
-        fs.writeFileSync(path, page.html);
+        fs.writeFileSync(path, page.contents);
     });
     console.log(chalk.cyan('PROCESS COMPLETE! Find the updated files in: ' + newPath));
 };
