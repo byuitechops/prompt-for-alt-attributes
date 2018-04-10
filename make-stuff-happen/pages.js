@@ -81,8 +81,8 @@ function pagesToImageObjs(err, htmlFiles) {
         var images = file.dom('img');
         file.images = [];
         images.each(function (i, image) {
-            alts.fileImgs.push(image);
             image = file.dom(image);
+            alts.fileImgs.push(image);
             var alt = image.attr('alt'),
                 //take out the session val added by electron
                 src = pathLib.resolve(getCurrentPath(), image.attr('src').split('?')[0]),
@@ -130,7 +130,6 @@ function matchStuff(newImgs) {
     var oldImgs = pagesToImageObjs(null, pages).noAltImgs;
     pages.map(function (page) {
         page.newImages = [];
-        page.images = oldImgs;
         //map the oldImages to the new ones that have the same name, 
         newImgs.forEach(function (newImg) {
             oldImgs.forEach(function (image) {
