@@ -1,5 +1,5 @@
 # Alt Attribute Checker
-This program is designed to crawl a d2l export in a folder (chosen by the user, and unzipped), and find all the images without an alt text.
+This program is designed to crawl a d2l export in a folder (chosen by the user, and unzipped), and find all the images embedded in HTML pages that are do not contain a valid (ADA compliant) alt text.
 The program will inject those images onto the index.html page, and the user will add inputs for each image.
 After the user submits all, the program writes to a new folder INSIDE of the d2l export folder with the updated files.
 

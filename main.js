@@ -8,8 +8,8 @@ const path = require('path'),
 
 function createWindow() {
     var win = new BrowserWindow({
-        width: 1100,
-        height: 850
+        width: 1400,
+        height: 1100
     });
     win.loadURL(url.format({
         pathname: path.join('.', 'index.html'),
