@@ -4,16 +4,14 @@ const pathLib = require('path');
 var changeAlts = require('./make-stuff-happen/changeAlts.js'),
     pages = require('./make-stuff-happen/pages.js');
 
-/*--------------------------
-HAPPENS AFTER USER SUBMITS
---------------------------*/
+//HAPPENS AFTER USER SUBMITS
 function makeHtmlChanges() {
     var images = document.querySelectorAll('img');
     var inputs = document.querySelectorAll('input'),
         textList = [],
         updatedImages = [];
     inputs.forEach(function (text) {
-        if (text.value !== '') {
+        if (text.value !== '' || text.value !== null) {
             textList.push({
                 id: text.id,
                 text: text.value
@@ -35,9 +33,6 @@ function makeHtmlChanges() {
             }
         });
     });
-    if (textList.length === 0) {
-        changeAlts('You must enter text to submit. ', null);
-    }
     var updatedPages = pages.match(updatedImages);
     changeAlts(null, updatedPages);
 }
