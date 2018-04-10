@@ -37,7 +37,7 @@ function iterateId(n) {
 function getCurrentPath() {
     var currentPath = document.getElementById('uploadFile').files[0].path;
     if (currentPath === undefined) {
-        console.log('invalid folder. changing to current directory.');
+        pagesToImageObjs('invalid folder. changing to current directory.', null);
         return pathLib.resolve(__dirname);
     }
     return currentPath;
@@ -89,8 +89,7 @@ function pagesToImageObjs(err, htmlFiles) {
                 newSrc = decodeMe(src);
 
             //if it's not a valid path, then identify it as a broken image.
-            if (isValidPath(newSrc) == false || !isUrl(newSrc)) {
-                //leave this here to handle equella links
+            if (!isValidPath(newSrc) || !isUrl(newSrc)) {
                 newSrc = src;
                 alts.brokenImgs.push({
                     imageFile: file.file,
@@ -102,12 +101,13 @@ function pagesToImageObjs(err, htmlFiles) {
             if (!alt || alt === '') {
                 //if the src attribute doesnt exist
                 if (!src || src === '') {
-                    console.log('image does not exist');
-                } //else if its still not a valid path, 
-                else if (!isUrl(newSrc)) {
+                    alts.brokenImgs.push({
+                        imageFile: file.file,
+                        source: newSrc
+                    });
+                } else if (!isUrl(newSrc)) {
                     var source = pathLib.resolve(getCurrentPath(), newSrc);
-                } //else, its a valid path, so make the source the decoded newSrc 
-                else {
+                } else {
                     source = newSrc;
                 }
                 //push each image obj to later match it with an imgID
