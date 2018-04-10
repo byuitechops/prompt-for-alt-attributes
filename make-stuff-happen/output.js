@@ -16,10 +16,11 @@ module.exports = function output(err, pages) {
         newPath = pathLib.resolve(currentPath, 'updatedFiles ' + timestamp);
     fs.mkdirSync(newPath);
     pages.forEach(function (page) {
+        // console.log('my page:', page);
         var parsedPath = pathLib.parse(page.file),
             fileName = parsedPath.name + parsedPath.ext,
             path = pathLib.join(newPath, fileName);
-        fs.writeFileSync(path, page.contents);
+        fs.writeFileSync(path, page.html);
     });
     console.log(chalk.cyan('PROCESS COMPLETE! Find the updated files in: ' + newPath));
 };
