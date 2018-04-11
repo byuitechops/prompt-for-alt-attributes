@@ -12,16 +12,12 @@ function isUrl(urlString) {
 }
 
 function isValidPath(imgPath) {
-    var isValid;
-    fs.access(imgPath, (err, isValid) => {
-        if (err) {
-            isValid = false;
-            // callback(err);
-        } else {
-            isValid = true;
-        }
-        return isValid;
-    });
+    try {
+        fs.accessSync(imgPath);
+        return true;
+    } catch (err) {
+        return false;
+    }
 }
 
 function decodeMe(imgPath) {
@@ -46,11 +42,13 @@ function getCurrentPath() {
 
 //1A. (on installation/first click) retrieve all the html files from the files
 function getAllPages() {
-    htmlFiles = fs.readdirSync(getCurrentPath())
+    var filepath = getCurrentPath();
+    console.log('file path: ', filepath);
+    htmlFiles = fs.readdirSync(filepath)
         .filter(function (file) {
             return file.includes('.html');
         }).map(function (file) {
-            var correctPath = pathLib.resolve(getCurrentPath(), file);
+            var correctPath = pathLib.resolve(filepath, file);
             if (correctPath == undefined) {
                 pagesToImageObjs('current path is undefined', null);
             }
@@ -83,40 +81,30 @@ function pagesToImageObjs(err, htmlFiles) {
         images.each(function (i, image) {
             image = file.dom(image);
             alts.fileImgs.push(image);
-            var alt = image.attr('alt'),
-                //take out the session val added by electron
-                src = pathLib.resolve(getCurrentPath(), image.attr('src').split('?')[0]),
+            //take out the session val added by electron
+            var src = pathLib.resolve(getCurrentPath(), image.attr('src').split('?')[0]),
                 newSrc = decodeMe(src);
-
             //if it's not a valid path, then identify it as a broken image.
-            if (!isValidPath(newSrc) || !isUrl(newSrc)) {
+            if (isValidPath(newSrc) == false || isUrl(newSrc) == true || !src || src == '') {
+                //reset the newSrc to match the original source
                 newSrc = src;
                 alts.brokenImgs.push({
                     imageFile: file.file,
                     source: newSrc
                 });
-            } else if (newSrc.includes('Course Files')) {
+            } else { //it's not a broken image, so it can be manipulated.
                 file.images.push(image);
-            }
-            if (!alt || alt === '') {
-                //if the src attribute doesnt exist
-                if (!src || src === '') {
-                    alts.brokenImgs.push({
-                        imageFile: file.file,
-                        source: newSrc
-                    });
-                } else if (!isUrl(newSrc)) {
+                var alt = image.attr('alt');
+                if (alt === '' || alt == undefined) {
                     var source = pathLib.resolve(getCurrentPath(), newSrc);
-                } else {
-                    source = newSrc;
+                    alts.noAltImgs.push({
+                        source: source,
+                        imageFile: file.file,
+                        id: iterateId(1)
+                    });
                 }
-                //push each image obj to later match it with an imgID
-                alts.noAltImgs.push({
-                    source: source,
-                    imageFile: file.file,
-                    id: iterateId(1)
-                });
             }
+
         });
         file.cheerioImgs = alts.fileImgs;
         return alts;
