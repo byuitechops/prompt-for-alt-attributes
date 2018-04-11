@@ -46,12 +46,12 @@ h2 {
 }
 
 .broken {
-    border: 5px solid red;
-    font-size: 20px;
+    border: 2px dashed red;
 }
 
 .brokenImage {
     color: #D48581;
+    padding: 10px;
     font-style: bold;
 }
 
