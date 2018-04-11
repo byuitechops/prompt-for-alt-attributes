@@ -1,8 +1,7 @@
 //5
 /*eslint no-unused-vars:1 */
 const pathLib = require('path'),
-    fs = require('fs'),
-    chalk = require('chalk');
+    fs = require('fs');
 
 //takes the path given by the user, and the final pages.
 module.exports = function output(err, pages) {
@@ -22,5 +21,5 @@ module.exports = function output(err, pages) {
             path = pathLib.join(newPath, fileName);
         fs.writeFileSync(path, page.html);
     });
-    console.log(chalk.cyan('PROCESS COMPLETE! Find the updated files in: ' + newPath));
+    console.log('PROCESS COMPLETE! Find the updated files in: ' + newPath);
 };
